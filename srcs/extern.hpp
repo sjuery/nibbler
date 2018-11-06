@@ -29,6 +29,7 @@ public:
 
 	virtual int getInput() = 0;
 	virtual void drawBox(struct coords, enum object) = 0;
+	virtual void display() = 0;
 };
 
 #endif

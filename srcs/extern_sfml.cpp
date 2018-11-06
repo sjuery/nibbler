@@ -17,12 +17,25 @@ SFMLInfo::SFMLInfo()
 
 SFMLInfo::~SFMLInfo()
 {
-	//This Sucks
+	_window->close();
+	delete _window;
+}
+
+void SFMLInfo::display()
+{
+	//
+	_window->display();
+	_window->clear(sf::Color::Black);
 }
 
 void SFMLInfo::drawBox(struct coords crds, enum object type)
 {
-	(void)crds;
+	sf::RectangleShape rectangle;
+	rectangle.setSize(sf::Vector2f(1, 1));
+	rectangle.setOutlineThickness(5);
+	rectangle.setPosition(crds.x, crds.y);
+	_window->draw(rectangle);
+
 	(void)type;
 }
 
@@ -42,39 +55,19 @@ int SFMLInfo::getInput()
 			if (event.type == sf::Event::KeyPressed)
 			{
 				if (event.key.code == sf::Keyboard::Num1)
-				{
-					_window->close();
-					delete _window;
 					return ONE;
-				}
 				if (event.key.code == sf::Keyboard::Num2)
-				{
-					_window->close();
-					delete _window;
 					return TWO;
-				}
 				if (event.key.code == sf::Keyboard::Num3)
-				{
-					_window->close();
-					delete _window;
 					return THREE;
-				}
 				if (event.key.code == sf::Keyboard::Up)
-				{
 					return UP;
-				}
 				if (event.key.code == sf::Keyboard::Down)
-				{
 					return DOWN;
-				}
 				if (event.key.code == sf::Keyboard::Left)
-				{
 					return LEFT;
-				}
 				if (event.key.code == sf::Keyboard::Right)
-				{
 					return RIGHT;
-				}
 			}
 		}
 	}

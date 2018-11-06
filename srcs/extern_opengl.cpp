@@ -33,7 +33,11 @@ OpenGLInfo::OpenGLInfo()
 
 OpenGLInfo::~OpenGLInfo()
 {
-	//This Sucks
+	glfwTerminate();
+}
+
+void OpenGLInfo::display()
+{
 }
 
 void OpenGLInfo::drawBox(struct coords crds, enum object type)
@@ -48,36 +52,19 @@ int OpenGLInfo::getInput()
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
 
-	if(glfwGetKey(_window, GLFW_KEY_1))
-	{
-		glfwTerminate();
+	if(glfwGetKey(_window, '1'))
 		return ONE;
-	}
-	if(glfwGetKey(_window, GLFW_KEY_2))
-	{
-		glfwTerminate();
+	if(glfwGetKey(_window, '2'))
 		return TWO;
-	}
-	if(glfwGetKey(_window, GLFW_KEY_3))
-	{
-		glfwTerminate();
+	if(glfwGetKey(_window, '3'))
 		return THREE;
-	}
 	if(glfwGetKey(_window, GLFW_KEY_UP))
-	{
 		return UP;
-	}
 	if(glfwGetKey(_window, GLFW_KEY_DOWN))
-	{
 		return DOWN;
-	}
 	if(glfwGetKey(_window, GLFW_KEY_LEFT))
-	{
 		return LEFT;
-	}
 	if(glfwGetKey(_window, GLFW_KEY_RIGHT))
-	{
 		return RIGHT;
-	}
 	return '0';
 }

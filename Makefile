@@ -6,7 +6,7 @@
 #    By: sjuery <sjuery@student.42.us.org>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/04 14:33:42 by sjuery            #+#    #+#              #
-#    Updated: 2018/11/03 22:02:57 by sjuery           ###   ########.fr        #
+#    Updated: 2018/11/05 18:11:53 by sjuery           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ $(NAME): $(OBJ)
 	g++ $(LDFLAGS) $(CFLAGS) -shared -fPIC $(shell pkg-config --cflags sfml-graphics sfml-window sfml-system) $(shell pkg-config --libs sfml-graphics sfml-window sfml-system) srcs/extern_sfml.cpp -o extern_sfml.dylib
 	g++ $(LDFLAGS) $(CFLAGS) -shared -fPIC -lncurses srcs/extern_ncursus.cpp -o extern_ncursus.dylib
 	g++ $(LDFLAGS) $(CFLAGS) -shared -fPIC -framework OpenGl -I/nfs/2017/s/sjuery/.brew/Cellar/glfw/3.2.1/include srcs/extern_opengl.cpp -o extern_opengl.dylib -L/nfs/2017/s/sjuery/.brew/Cellar/glfw/3.2.1/lib -lglfw -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo
-	g++ $(LDFLAGS) $^ -o $(NAME)
+	g++ $(LDFLAGS) $(CFLAGS) $^ -o $(NAME)
 	@printf '\033[32m[ ✔ ] %s\n\033[0m' "Created Nibbler"
 
 clean:

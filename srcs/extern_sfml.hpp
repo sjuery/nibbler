@@ -12,6 +12,7 @@ public:
 
 	int getInput();
 	void drawBox(struct coords, enum object);
+	void display();
 };
 
 #endif

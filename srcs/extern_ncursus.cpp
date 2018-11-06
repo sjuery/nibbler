@@ -22,7 +22,11 @@ NCursusInfo::NCursusInfo()
 
 NCursusInfo::~NCursusInfo()
 {
-	//This Sucks
+	endwin();
+}
+
+void NCursusInfo::display()
+{
 }
 
 void NCursusInfo::drawBox(struct coords crds, enum object type)
@@ -37,11 +41,11 @@ int NCursusInfo::getInput()
 
 	switch(c)
 	{
-		case '1': endwin();
+		case '1':
 			return ONE;
-		case '2': endwin();
+		case '2':
 			return TWO;
-		case '3': endwin();
+		case '3':
 			return THREE;
 		case KEY_UP:
 			return UP;

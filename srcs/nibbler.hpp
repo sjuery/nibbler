@@ -1,12 +1,15 @@
 #ifndef NIBBLER_HPP
 #define NIBBLER_HPP
 #include <iostream>
+#include <list>
 #include <unistd.h>
 
-struct snakeList {
-	coords crds;
-	struct snakeList *prev;
-	struct snakeList *next;
+#define SNAKESIZE 5;
+
+struct gameEntity
+{
+	char type;
+	struct coords coords;
 };
 
 class Nibbler {
@@ -14,14 +17,20 @@ private:
 	GameInfo* gi;
 	GameInfo* (*create)();
 	void (*destroy)(GameInfo*);
-	snakeList *snake;
+	int last_input;
+	std::list<gameEntity> snake;
+	gameEntity food;
+
 public:
 	Nibbler() {};
 	virtual ~Nibbler() {};
 
+	gameEntity newBody(char, int, int);
 	GameInfo* createWindow(int);
-	void playerController(int);
-	void draw();
+	void spawnFood();
+	void controls(int);
+	void collision();
+	void snakeUpdate();
 	void gameLoop(int);
 };
 
