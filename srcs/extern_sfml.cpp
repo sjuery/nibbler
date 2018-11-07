@@ -1,8 +1,8 @@
 #include "extern_sfml.hpp"
 
-extern "C" GameInfo* create_object()
+extern "C" GameInfo* create_object( coords dimensions )
 {
-	return new SFMLInfo();
+	return new SFMLInfo(dimensions);
 }
 
 extern "C" void destroy_object( GameInfo* object )
@@ -10,9 +10,9 @@ extern "C" void destroy_object( GameInfo* object )
 	delete object;
 }
 
-SFMLInfo::SFMLInfo()
+SFMLInfo::SFMLInfo(coords dimensions)
 {
-	_window = new sf::RenderWindow(sf::VideoMode(800, 600), "Test");
+	_window = new sf::RenderWindow(sf::VideoMode(dimensions.x*10, dimensions.y*10), "Test");
 }
 
 SFMLInfo::~SFMLInfo()

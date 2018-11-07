@@ -1,7 +1,8 @@
 #include "extern_ncursus.hpp"
 
-extern "C" GameInfo* create_object()
+extern "C" GameInfo* create_object( coords dimensions )
 {
+	(void)dimensions;
 	return new NCursusInfo;
 }
 
@@ -13,11 +14,15 @@ extern "C" void destroy_object( GameInfo* object )
 NCursusInfo::NCursusInfo()
 {
 	newterm(getenv("TERM"), stdout, stdin);
+	curs_set(FALSE);
 	raw();
 	noecho();
 	cbreak();
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
+	start_color();
+	init_pair(1, COLOR_RED, COLOR_RED);
+	init_pair(2, COLOR_GREEN, COLOR_GREEN);
 }
 
 NCursusInfo::~NCursusInfo()
@@ -27,12 +32,15 @@ NCursusInfo::~NCursusInfo()
 
 void NCursusInfo::display()
 {
+	erase();
+	// refresh();
 }
 
 void NCursusInfo::drawBox(struct coords crds, enum object type)
 {
-	(void)crds;
-	(void)type;
+	attron(COLOR_PAIR((int)type));
+	mvprintw(crds.y/10, crds.x/5, "  ");
+	attroff(COLOR_PAIR((int)type));
 }
 
 int NCursusInfo::getInput()

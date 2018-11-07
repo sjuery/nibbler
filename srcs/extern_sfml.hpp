@@ -7,7 +7,7 @@ class SFMLInfo : public GameInfo {
 private:
 	sf::RenderWindow* _window;
 public:
-	SFMLInfo();
+	SFMLInfo(coords);
 	~SFMLInfo();
 
 	int getInput();

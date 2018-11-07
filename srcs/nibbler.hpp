@@ -14,8 +14,15 @@ struct gameEntity
 
 class Nibbler {
 private:
+	//Time Loop
+	double ltime;
+	double deltaTime;
+	double currentTime;
+	double frameTime;
+	double newTime;
+	struct coords dimensions;
 	GameInfo* gi;
-	GameInfo* (*create)();
+	GameInfo* (*create)(coords);
 	void (*destroy)(GameInfo*);
 	int last_input;
 	std::list<gameEntity> snake;
@@ -31,7 +38,7 @@ public:
 	void controls(int);
 	void collision();
 	void snakeUpdate();
-	void gameLoop(int);
+	void gameLoop(int, int);
 };
 
 #endif

@@ -3,6 +3,13 @@
 #include "extern.hpp"
 #include "nibbler.hpp"
 
+
+time_t getTimeSinceEpoch()
+{
+    auto now = std::chrono::system_clock::now();
+    return std::chrono::system_clock::to_time_t( now );
+}
+
 gameEntity Nibbler::newBody(char type, int x, int y)
 {
 	gameEntity tmpPart;
@@ -27,24 +34,41 @@ GameInfo* Nibbler::createWindow(int input)
 		if(!(handle = dlopen("extern_opengl.dylib", RTLD_LAZY)))
 			return NULL;
 
-	create = (GameInfo* (*)())dlsym(handle, "create_object");
+	create = (GameInfo* (*)(coords))dlsym(handle, "create_object");
 	destroy = (void (*)(GameInfo*))dlsym(handle, "destroy_object");
-	return((GameInfo*)create());
+	return((GameInfo*)create(dimensions));
 }
 
 void Nibbler::snakeUpdate()
 {
-	gi->drawBox(food.coords, SNAKE);
+	coords tmpCoords;
+	for(int y = 1; y < dimensions.y * 10; y++)
+	{
+		tmpCoords.x = 0;
+		tmpCoords.y = y;
+		gi->drawBox(tmpCoords, SNAKE);
+		tmpCoords.x = dimensions.x*10;
+		gi->drawBox(tmpCoords, SNAKE);
+	}
+	for(int x = 1; x < dimensions.x * 10; x++)
+	{
+		tmpCoords.x = x;
+		tmpCoords.y = 0;
+		gi->drawBox(tmpCoords, SNAKE);
+		tmpCoords.y = dimensions.y*10;
+		gi->drawBox(tmpCoords, SNAKE);
+	}
+	gi->display();
+	gi->drawBox(food.coords, FOOD);
 	for(const gameEntity op : snake) {
 		gi->drawBox(op.coords, SNAKE);
 	}
-	gi->display();
 }
 
 void Nibbler::spawnFood()
 {
-	food.coords.x = (rand()%51)*10;
-	food.coords.y = (rand()%51)*10;
+	food.coords.x = (rand()%(dimensions.x+2))*10;
+	food.coords.y = (rand()%(dimensions.y+2))*10;
 	for(const gameEntity op : snake) {
 		if(op.coords.x == food.coords.x && op.coords.y == food.coords.y)
 			spawnFood();
@@ -53,6 +77,7 @@ void Nibbler::spawnFood()
 
 void Nibbler::collision()
 {
+	coords tmpCoords;
 	for(const gameEntity op : snake) {
 		if(op.type == '*')
 			continue ;
@@ -64,11 +89,30 @@ void Nibbler::collision()
 		snake.push_back(newBody('.', snake.back().coords.x, snake.back().coords.y));
 		spawnFood();
 	}
+	for(int y = 1; y < dimensions.y * 10; y++)
+	{
+		tmpCoords.x = 0;
+		tmpCoords.y = y;
+		if(tmpCoords.x == snake.front().coords.x && tmpCoords.y == snake.front().coords.y)
+			exit(1);
+		tmpCoords.x = dimensions.x*10;
+		if(tmpCoords.x == snake.front().coords.x && tmpCoords.y == snake.front().coords.y)
+			exit(1);
+	}
+	for(int x = 1; x < dimensions.x * 10; x++)
+	{
+		tmpCoords.x = x;
+		tmpCoords.y = 0;
+		if(tmpCoords.x == snake.front().coords.x && tmpCoords.y == snake.front().coords.y)
+			exit(1);
+		tmpCoords.y = dimensions.y*10;
+		if(tmpCoords.x == snake.front().coords.x && tmpCoords.y == snake.front().coords.y)
+			exit(1);
+	}
 }
 
 void Nibbler::controls(int input)
 {
-	usleep(50000);
 	if(input == ONE || input == TWO || input == THREE)
 	{
 		delete(gi);
@@ -105,23 +149,33 @@ void Nibbler::controls(int input)
 	collision();
 }
 
-void Nibbler::gameLoop(int input)
+void Nibbler::gameLoop(int x, int y)
 {
 	int c;
 
-	snake.push_front(newBody('*', 10, 10));
-	snake.push_back(newBody('.', 10, 15));
-	snake.push_back(newBody('.', 10, 20));
-	snake.push_back(newBody('.', 10, 25));
-	snake.push_back(newBody('.', 10, 35));
-	snake.push_back(newBody('.', 10, 40));
-	snake.push_back(newBody('.', 10, 45));
-	snake.push_back(newBody('.', 10, 50));
-	snake.push_back(newBody('.', 10, 55));
-	gi = createWindow(input);
+	dimensions.x = x;
+	dimensions.y = y;
+	currentTime = getTimeSinceEpoch();
+	ltime = 0.0;
+	deltaTime = 1.0/60.0;
+	snake.push_front(newBody('*', dimensions.x*10/2, dimensions.y*10/2));
+	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+5));
+	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+10));
+	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+15));
+	gi = createWindow(1);
 	spawnFood();
 	while(1)
 	{
+		usleep(10000);
+		newTime = getTimeSinceEpoch();
+		frameTime = newTime - currentTime;
+		currentTime = newTime;
+		while(frameTime > 0.0)
+		{
+			float cdeltaTime = std::min(frameTime, deltaTime);
+			frameTime -= cdeltaTime;
+			ltime += cdeltaTime;
+		}
 		c = gi->getInput();
 		controls(c);
 		snakeUpdate();
@@ -132,10 +186,9 @@ void Nibbler::gameLoop(int input)
 int main(int argc, char** argv) {
 	srand (time(NULL));
 	Nibbler nibble;
-	if(argc == 2)
+	if(argc == 3)
 	{
-		if(atoi(argv[argc-1]) >= 1 && atoi(argv[argc-1]) <= 3)
-			nibble.gameLoop(atoi(argv[argc-1]));
+		nibble.gameLoop(atoi(argv[argc-2]), atoi(argv[argc-1]));
 	}
 	else
 		std::cout << "Usage: ./nibbler [Display Type]" << std::endl;

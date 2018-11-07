@@ -1,7 +1,8 @@
 #include "extern_opengl.hpp"
 
-extern "C" GameInfo* create_object()
+extern "C" GameInfo* create_object( coords dimensions )
 {
+	(void)dimensions;
 	return new OpenGLInfo;
 }
 
