@@ -2,12 +2,13 @@
 #include <iostream>
 #include "extern.hpp"
 #include "nibbler.hpp"
+#include <sys/time.h>
 
-
-time_t getTimeSinceEpoch()
+unsigned getTickCount()
 {
-    auto now = std::chrono::system_clock::now();
-    return std::chrono::system_clock::to_time_t( now );
+	struct timeval tv;
+    gettimeofday(&tv, 0);
+    return unsigned((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
 gameEntity Nibbler::newBody(char type, int x, int y)
@@ -42,23 +43,23 @@ GameInfo* Nibbler::createWindow(int input)
 void Nibbler::snakeUpdate()
 {
 	coords tmpCoords;
+	gi->display();
 	for(int y = 1; y < dimensions.y * 10; y++)
 	{
 		tmpCoords.x = 0;
 		tmpCoords.y = y;
-		gi->drawBox(tmpCoords, SNAKE);
+		gi->drawBox(tmpCoords, WALL);
 		tmpCoords.x = dimensions.x*10;
-		gi->drawBox(tmpCoords, SNAKE);
+		gi->drawBox(tmpCoords, WALL);
 	}
 	for(int x = 1; x < dimensions.x * 10; x++)
 	{
 		tmpCoords.x = x;
 		tmpCoords.y = 0;
-		gi->drawBox(tmpCoords, SNAKE);
+		gi->drawBox(tmpCoords, WALL);
 		tmpCoords.y = dimensions.y*10;
-		gi->drawBox(tmpCoords, SNAKE);
+		gi->drawBox(tmpCoords, WALL);
 	}
-	gi->display();
 	gi->drawBox(food.coords, FOOD);
 	for(const gameEntity op : snake) {
 		gi->drawBox(op.coords, SNAKE);
@@ -67,8 +68,8 @@ void Nibbler::snakeUpdate()
 
 void Nibbler::spawnFood()
 {
-	food.coords.x = (rand()%(dimensions.x+2))*10;
-	food.coords.y = (rand()%(dimensions.y+2))*10;
+	food.coords.x = (rand()%(dimensions.x-1)+1)*10;
+	food.coords.y = (rand()%(dimensions.y-1)+1)*10;
 	for(const gameEntity op : snake) {
 		if(op.coords.x == food.coords.x && op.coords.y == food.coords.y)
 			spawnFood();
@@ -118,7 +119,7 @@ void Nibbler::controls(int input)
 		delete(gi);
 		gi = createWindow(input);
 	}
-
+	collision();
 	if((input == UP && last_input != DOWN) || (input == DOWN && last_input != UP) || (input == LEFT && last_input != RIGHT) || (input == RIGHT && last_input != LEFT))
 		last_input = input;
 	if(last_input == UP)
@@ -146,7 +147,6 @@ void Nibbler::controls(int input)
 		snake.push_front(newBody('*', snake.front().coords.x+10, snake.front().coords.y));
 		snake.pop_back();
 	}
-	collision();
 }
 
 void Nibbler::gameLoop(int x, int y)
@@ -155,9 +155,8 @@ void Nibbler::gameLoop(int x, int y)
 
 	dimensions.x = x;
 	dimensions.y = y;
-	currentTime = getTimeSinceEpoch();
-	ltime = 0.0;
-	deltaTime = 1.0/60.0;
+	int loops;
+	float next_game_tick = getTickCount();
 	snake.push_front(newBody('*', dimensions.x*10/2, dimensions.y*10/2));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+5));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+10));
@@ -166,18 +165,14 @@ void Nibbler::gameLoop(int x, int y)
 	spawnFood();
 	while(1)
 	{
-		usleep(10000);
-		newTime = getTimeSinceEpoch();
-		frameTime = newTime - currentTime;
-		currentTime = newTime;
-		while(frameTime > 0.0)
+		loops = 0;
+		while(getTickCount() > next_game_tick && loops < 1)
 		{
-			float cdeltaTime = std::min(frameTime, deltaTime);
-			frameTime -= cdeltaTime;
-			ltime += cdeltaTime;
+			controls(c);
+			c = gi->getInput();
+			next_game_tick += 120 + 1000/next_game_tick;
+			loops++;
 		}
-		c = gi->getInput();
-		controls(c);
 		snakeUpdate();
 	}
 	destroy(gi);

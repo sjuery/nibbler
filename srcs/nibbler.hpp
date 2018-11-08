@@ -14,12 +14,6 @@ struct gameEntity
 
 class Nibbler {
 private:
-	//Time Loop
-	double ltime;
-	double deltaTime;
-	double currentTime;
-	double frameTime;
-	double newTime;
 	struct coords dimensions;
 	GameInfo* gi;
 	GameInfo* (*create)(coords);

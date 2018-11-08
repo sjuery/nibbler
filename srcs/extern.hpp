@@ -5,7 +5,8 @@
 
 enum object {
 	SNAKE = 1,
-	FOOD = 2,
+	FOOD,
+	WALL
 };
 
 enum keys {
