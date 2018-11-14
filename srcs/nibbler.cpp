@@ -161,7 +161,7 @@ void Nibbler::gameLoop(int x, int y)
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+5));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+10));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+15));
-	gi = createWindow(1);
+	gi = createWindow(3);
 	spawnFood();
 	while(1)
 	{
