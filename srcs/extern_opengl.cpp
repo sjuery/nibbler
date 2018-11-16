@@ -3,8 +3,7 @@
 
 extern "C" GameInfo* create_object( coords dimensions )
 {
-	(void)dimensions;
-	return new OpenGLInfo;
+	return new OpenGLInfo(dimensions);
 }
 
 extern "C" void destroy_object( GameInfo* object )
@@ -29,16 +28,6 @@ const char *fragmentShaderSource = "#version 330 core\n"
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
-	// std::ifstream ifs(vertex_file_path);
-  	// std::string VertexShaderCode( (std::istreambuf_iterator<char>(ifs) ),
-    //                    (std::istreambuf_iterator<char>()    ) );
-	// std::ifstream ifs { vertex_file_path };
-	// std::string VertexShaderCode { std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>() };
-	// std::ifstream ifss { fragment_file_path };
-	// std::string FragmentShaderCode { std::istreambuf_iterator<char>(ifss), std::istreambuf_iterator<char>() };
-
-
-	// std::cout << FragmentShaderCode << VertexShaderCode << std::endl;
 	int success;
 	char infoLog[512];
 
@@ -77,16 +66,13 @@ const char *fragmentShaderSource = "#version 330 core\n"
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-	// glDetachShader(ProgramID, VertexShaderID);
-	// glDetachShader(ProgramID, FragmentShaderID);
-
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
 
 	return ProgramID;
 }
 
-OpenGLInfo::OpenGLInfo()
+OpenGLInfo::OpenGLInfo(coords dimensions)
 {
 	if (!glfwInit())
 	{
@@ -97,7 +83,7 @@ OpenGLInfo::OpenGLInfo()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	_window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+	_window = glfwCreateWindow(dimensions.x*10, dimensions.y*10, "LearnOpenGL", NULL, NULL);
 	if (_window == NULL)
 	{
 	    std::cout << "Failed to create GLFW window" << std::endl;
@@ -105,6 +91,7 @@ OpenGLInfo::OpenGLInfo()
 	    exit(1);
 	}
 	glfwMakeContextCurrent(_window);
+	_shaderprogram = LoadShaders("srcs/shader.vert", "srcs/shader.frag");
 }
 
 OpenGLInfo::~OpenGLInfo()
@@ -114,70 +101,38 @@ OpenGLInfo::~OpenGLInfo()
 
 void OpenGLInfo::display()
 {
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(_shaderprogram);
+	glDrawArrays(GL_POINTS, 0, 6);
+	glfwSwapBuffers(_window);
+	glfwPollEvents();
+	std::fill(_triangle, _triangle+_triangleSize, 0);
+	_triangleSize = 0;
 }
 
 void OpenGLInfo::drawBox(struct coords crds, enum object type)
 {
-	float triangle[] = {
-		0.1f,  0.1f, 0.0f,
-		0.1f, -0.1f, 0.0f,
-		-0.1f, -0.1f, 0.0f,
-		-0.1f,  0.1f, 0.0f
-	};
-	unsigned int position[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3,    // second triangle
-};
-	int shaderprogram = LoadShaders("srcs/shader.vert", "srcs/shader.frag");
-
-	unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &EBO);
-    glGenBuffers(1, &VBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0);
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	while(!glfwWindowShouldClose(_window))
-	{
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glUseProgram(shaderprogram);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-		glfwSwapBuffers(_window);
-		glfwPollEvents();
-	}
-
-	// glUseProgram(LoadShaders("shader.vert", "shader.frag"));
-	// glBindVertexArray(VAO);
-	// glDrawArrays(GL_TRIANGLES, 0, 3);
-	// (void)triangle;
-	(void)crds;
+	_triangle[_triangleSize++] = crds.x/500.0f*2.0f - 1;
+	_triangle[_triangleSize++] = crds.y/500.0f*-2.0f + 1;
+	_triangle[_triangleSize++] = .0f;
+	unsigned int VBO, VAO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_triangle), _triangle, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glPointSize(10.0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(VAO);
 	(void)type;
 }
 
 int OpenGLInfo::getInput()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glfwSwapBuffers(_window);
-	glfwPollEvents();
-
 	if(glfwGetKey(_window, '1'))
 		return ONE;
 	if(glfwGetKey(_window, '2'))

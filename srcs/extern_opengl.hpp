@@ -9,8 +9,11 @@
 class OpenGLInfo : public GameInfo {
 private:
 	GLFWwindow* _window;
+	GLfloat _triangle[100000];
+	int _triangleSize = 0;
+	int _shaderprogram;
 public:
-	OpenGLInfo();
+	OpenGLInfo(coords);
 	~OpenGLInfo();
 
 	int getInput();

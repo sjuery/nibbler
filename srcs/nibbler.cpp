@@ -42,24 +42,24 @@ GameInfo* Nibbler::createWindow(int input)
 
 void Nibbler::snakeUpdate()
 {
-	coords tmpCoords;
+	// coords tmpCoords;
 	gi->display();
-	for(int y = 1; y < dimensions.y * 10; y++)
-	{
-		tmpCoords.x = 0;
-		tmpCoords.y = y;
-		gi->drawBox(tmpCoords, WALL);
-		tmpCoords.x = dimensions.x*10;
-		gi->drawBox(tmpCoords, WALL);
-	}
-	for(int x = 1; x < dimensions.x * 10; x++)
-	{
-		tmpCoords.x = x;
-		tmpCoords.y = 0;
-		gi->drawBox(tmpCoords, WALL);
-		tmpCoords.y = dimensions.y*10;
-		gi->drawBox(tmpCoords, WALL);
-	}
+	// for(int y = 1; y < dimensions.y * 10; y++)
+	// {
+	// 	tmpCoords.x = 0;
+	// 	tmpCoords.y = y;
+	// 	gi->drawBox(tmpCoords, WALL);
+	// 	tmpCoords.x = dimensions.x*10;
+	// 	gi->drawBox(tmpCoords, WALL);
+	// }
+	// for(int x = 1; x < dimensions.x * 10; x++)
+	// {
+	// 	tmpCoords.x = x;
+	// 	tmpCoords.y = 0;
+	// 	gi->drawBox(tmpCoords, WALL);
+	// 	tmpCoords.y = dimensions.y*10;
+	// 	gi->drawBox(tmpCoords, WALL);
+	// }
 	gi->drawBox(food.coords, FOOD);
 	for(const gameEntity op : snake) {
 		gi->drawBox(op.coords, SNAKE);
@@ -151,12 +151,12 @@ void Nibbler::controls(int input)
 
 void Nibbler::gameLoop(int x, int y)
 {
-	int c;
+	int c = 0;
 
 	dimensions.x = x;
 	dimensions.y = y;
-	int loops;
-	float next_game_tick = getTickCount();
+	// int loops;
+	// float next_game_tick = getTickCount();
 	snake.push_front(newBody('*', dimensions.x*10/2, dimensions.y*10/2));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+5));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+10));
@@ -165,14 +165,15 @@ void Nibbler::gameLoop(int x, int y)
 	spawnFood();
 	while(1)
 	{
-		loops = 0;
-		while(getTickCount() > next_game_tick && loops < 1)
-		{
-			controls(c);
-			c = gi->getInput();
-			next_game_tick += 120 + 1000/next_game_tick;
-			loops++;
-		}
+		// loops = 0;
+		// while(getTickCount() > next_game_tick && loops < 1)
+		// {
+		controls(c);
+		c = gi->getInput();
+		usleep(30000);
+		// 	next_game_tick += 120 + 1000/next_game_tick;
+		// 	loops++;
+		// }
 		snakeUpdate();
 	}
 	destroy(gi);
