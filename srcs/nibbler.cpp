@@ -42,24 +42,24 @@ GameInfo* Nibbler::createWindow(int input)
 
 void Nibbler::snakeUpdate()
 {
-	// coords tmpCoords;
+	coords tmpCoords;
 	gi->display();
-	// for(int y = 1; y < dimensions.y * 10; y++)
-	// {
-	// 	tmpCoords.x = 0;
-	// 	tmpCoords.y = y;
-	// 	gi->drawBox(tmpCoords, WALL);
-	// 	tmpCoords.x = dimensions.x*10;
-	// 	gi->drawBox(tmpCoords, WALL);
-	// }
-	// for(int x = 1; x < dimensions.x * 10; x++)
-	// {
-	// 	tmpCoords.x = x;
-	// 	tmpCoords.y = 0;
-	// 	gi->drawBox(tmpCoords, WALL);
-	// 	tmpCoords.y = dimensions.y*10;
-	// 	gi->drawBox(tmpCoords, WALL);
-	// }
+	for(int y = 1; y < dimensions.y * 10; y++)
+	{
+		tmpCoords.x = 0;
+		tmpCoords.y = y;
+		gi->drawBox(tmpCoords, WALL);
+		tmpCoords.x = dimensions.x*10;
+		gi->drawBox(tmpCoords, WALL);
+	}
+	for(int x = 1; x < dimensions.x * 10; x++)
+	{
+		tmpCoords.x = x;
+		tmpCoords.y = 0;
+		gi->drawBox(tmpCoords, WALL);
+		tmpCoords.y = dimensions.y*10;
+		gi->drawBox(tmpCoords, WALL);
+	}
 	gi->drawBox(food.coords, FOOD);
 	for(const gameEntity op : snake) {
 		gi->drawBox(op.coords, SNAKE);
@@ -171,8 +171,8 @@ void Nibbler::gameLoop(int x, int y)
 		controls(c);
 		c = gi->getInput();
 		usleep(30000);
-		// 	next_game_tick += 120 + 1000/next_game_tick;
-		// 	loops++;
+			// next_game_tick += 120 + 1000/next_game_tick;
+			// loops++;
 		// }
 		snakeUpdate();
 	}

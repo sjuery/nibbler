@@ -9,8 +9,10 @@
 class OpenGLInfo : public GameInfo {
 private:
 	GLFWwindow* _window;
-	GLfloat _triangle[100000];
-	int _triangleSize = 0;
+	GLfloat _square[100000];
+	coords _dimen;
+	unsigned int _VBO;
+	int _squareSize = 0;
 	int _shaderprogram;
 public:
 	OpenGLInfo(coords);

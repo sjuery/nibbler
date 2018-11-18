@@ -72,7 +72,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
 	return ProgramID;
 }
 
-OpenGLInfo::OpenGLInfo(coords dimensions)
+OpenGLInfo::OpenGLInfo(coords dimensions) : _dimen(dimensions)
 {
 	if (!glfwInit())
 	{
@@ -83,7 +83,7 @@ OpenGLInfo::OpenGLInfo(coords dimensions)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	_window = glfwCreateWindow(dimensions.x*10, dimensions.y*10, "LearnOpenGL", NULL, NULL);
+	_window = glfwCreateWindow(_dimen.x*5, _dimen.y*5, "LearnOpenGL", NULL, NULL);
 	if (_window == NULL)
 	{
 	    std::cout << "Failed to create GLFW window" << std::endl;
@@ -92,6 +92,15 @@ OpenGLInfo::OpenGLInfo(coords dimensions)
 	}
 	glfwMakeContextCurrent(_window);
 	_shaderprogram = LoadShaders("srcs/shader.vert", "srcs/shader.frag");
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &_VBO);
+	glBindVertexArray(VAO);
+	glEnableVertexAttribArray(0);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glPointSize(10);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(VAO);
 }
 
 OpenGLInfo::~OpenGLInfo()
@@ -104,30 +113,21 @@ void OpenGLInfo::display()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(_shaderprogram);
-	glDrawArrays(GL_POINTS, 0, 6);
+	glDrawArrays(GL_POINTS, 0, _squareSize/3);
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
-	std::fill(_triangle, _triangle+_triangleSize, 0);
-	_triangleSize = 0;
+	std::fill(_square, _square+_squareSize, 0);
+	_squareSize = 0;
 }
 
 void OpenGLInfo::drawBox(struct coords crds, enum object type)
 {
-	_triangle[_triangleSize++] = crds.x/500.0f*2.0f - 1;
-	_triangle[_triangleSize++] = crds.y/500.0f*-2.0f + 1;
-	_triangle[_triangleSize++] = .0f;
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(_triangle), _triangle, GL_STATIC_DRAW);
+	_square[_squareSize++] = crds.x/(_dimen.x*5.0f)*1.0f - 1;
+	_square[_squareSize++] = crds.y/(_dimen.y*5.0f)*-1.0f + 1;
+	_square[_squareSize++] = .0f;
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_square), _square, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	glPointSize(10.0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(VAO);
 	(void)type;
 }
 
