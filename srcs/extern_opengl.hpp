@@ -9,11 +9,11 @@
 class OpenGLInfo : public GameInfo {
 private:
 	GLFWwindow* _window;
-	GLfloat _square[100000];
+	// GLfloat _square[100000];
 	coords _dimen;
-	unsigned int _VBO;
-	int _squareSize = 0;
-	int _shaderprogram;
+	GLuint _VBO;
+	// int _squareSize = 0;
+	GLuint _shaderprogram;
 public:
 	OpenGLInfo(coords);
 	~OpenGLInfo();

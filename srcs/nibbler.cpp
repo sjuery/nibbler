@@ -155,8 +155,8 @@ void Nibbler::gameLoop(int x, int y)
 
 	dimensions.x = x;
 	dimensions.y = y;
-	// int loops;
-	// float next_game_tick = getTickCount();
+	int loops;
+	float next_game_tick = getTickCount();
 	snake.push_front(newBody('*', dimensions.x*10/2, dimensions.y*10/2));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+5));
 	snake.push_back(newBody('.', dimensions.x*10/2, dimensions.y*10/2+10));
@@ -165,15 +165,14 @@ void Nibbler::gameLoop(int x, int y)
 	spawnFood();
 	while(1)
 	{
-		// loops = 0;
-		// while(getTickCount() > next_game_tick && loops < 1)
-		// {
-		controls(c);
-		c = gi->getInput();
-		usleep(30000);
-			// next_game_tick += 120 + 1000/next_game_tick;
-			// loops++;
-		// }
+		loops = 0;
+		while(getTickCount() > next_game_tick && loops < 1)
+		{
+			c = gi->getInput();
+			controls(c);
+			next_game_tick += 100;
+			loops++;
+		}
 		snakeUpdate();
 	}
 	destroy(gi);
